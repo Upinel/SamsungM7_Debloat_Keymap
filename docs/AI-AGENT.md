@@ -16,7 +16,7 @@ that address is not part of this guide.
 
 - `LS32BM701UUXXU`, `22_NIKEL_SMT`, Tizen 6.5
 - `T-NKLBWWC-1720.7`, BT-S
-- Vetro `0.3.5`, dashboard on `http://<TV>:8099`
+- Vetro `0.3.5`, dashboard on `http://$TV_IP:8099`
 - Developer Mode Host PC IP `127.0.0.1`
 
 ## Preconditions
@@ -100,7 +100,7 @@ in-usbc  USB-C   source:41
 | Filter connected but buttons open apps | Re-run `setup-remap.py`; confirm patches not overwritten. |
 | Dock closes on Home release | Patched dock DLL missing; re-run `apply-m7-patches.py`. |
 | Samsung Home pill does nothing | `dock-catalog.js` patch missing; re-run patches. |
-| Service won't come back after restart | Launch `vetrotvapp.app` via `POST http://<TV>:8001/api/v2/applications/vetrotvapp.app`; wait 120s. |
+| Service won't come back after restart | Launch `vetrotvapp.app` via `POST http://$TV_IP:8001/api/v2/applications/vetrotvapp.app`; wait 120s. |
 
 ## Safety
 
