@@ -1,0 +1,15 @@
+diff --git a/dock/src/Program.cs b/dock/src/Program.cs
+index 52dfcac..5884083 100644
+--- a/dock/src/Program.cs
++++ b/dock/src/Program.cs
+@@ -528,6 +528,10 @@ namespace Launcher
+                         SelectPage(_appsCtl, _appsDock);
+                         break;
+                     case KeyAction.Hide:
++                        // The key release reaches the focused dock after the evdev press that
++                        // already toggled it. Ignore that release; otherwise the dock closes
++                        // immediately on TVs that focus it before the release.
++                        if (key == "XF86Home" && Efl.ecore_time_get() - _lastHome < HomeDebounceSeconds) break;
+                         if (key == "XF86Home") _lastHome = Efl.ecore_time_get();
+                         HideDock();
+                         break;

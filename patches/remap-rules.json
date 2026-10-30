@@ -1,0 +1,46 @@
+{
+  "rules": [
+    {
+      "id": "netflix-hdmi1",
+      "enabled": true,
+      "trigger": {
+        "type": "physical",
+        "value": "226"
+      },
+      "actions": [
+        {
+          "type": "key",
+          "key": "KEY_HDMI1"
+        }
+      ]
+    },
+    {
+      "id": "disney-hdmi2",
+      "enabled": true,
+      "trigger": {
+        "type": "physical",
+        "value": "626"
+      },
+      "actions": [
+        {
+          "type": "key",
+          "key": "KEY_HDMI2"
+        }
+      ]
+    },
+    {
+      "id": "prime-usbc",
+      "enabled": true,
+      "trigger": {
+        "type": "physical",
+        "value": "221"
+      },
+      "actions": [
+        {
+          "type": "key",
+          "key": "KEY_USBC"
+        }
+      ]
+    }
+  ]
+}

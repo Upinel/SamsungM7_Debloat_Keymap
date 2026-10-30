@@ -1,0 +1,5 @@
+# the inputs panel (Up on the dock)
+in-tv	TV	source:0
+in-hdmi1	HDMI 1	source:13
+in-hdmi2	HDMI 2	source:14
+in-usbc	USB-C	source:41
