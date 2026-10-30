@@ -1,0 +1,2 @@
+# Only needed for scripts/tv-remote.py (Developer Mode before Vetro is installed).
+websocket-client>=1.6

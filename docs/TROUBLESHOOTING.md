@@ -4,11 +4,40 @@
 
 ```bash
 export TV_IP="192.168.1.50"   # example only - replace with your TV's IP
+export HOST_IP="192.168.1.23" # example only - this computer's LAN IP
 ```
 
-All commands below use `$TV_IP`. Earlier revisions used a test-LAN address;
+All commands below use `$TV_IP` and `$HOST_IP`. Earlier revisions used a test-LAN address;
 that address is not part of this guide.
 
+
+## Developer Mode: 12345 and Host PC IP
+
+The M7 remote has no digit keys.
+
+If Vetro is running:
+
+```bash
+python3 scripts/vetro-key.py --tv "$TV_IP" digits 12345
+python3 scripts/vetro-key.py --tv "$TV_IP" ip "$HOST_IP" --submit
+```
+
+Before Vetro is installed, pair the Samsung WebSocket remote once:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 scripts/tv-remote.py --tv "$TV_IP" --wait 60 --key KEY_HOME
+# accept the Allow prompt on the TV with the physical remote
+python3 scripts/tv-remote.py --tv "$TV_IP" --digits 12345
+python3 scripts/tv-remote.py --tv "$TV_IP" --ip "$HOST_IP"
+python3 scripts/tv-remote.py --tv "$TV_IP" --key KEY_DOWN --key KEY_ENTER
+```
+
+`HOST_IP` is the computer's LAN address. For the TV-local root cutover use
+`127.0.0.1`. Verify with the REST API's `developerMode` and `developerIP`.
+
+If the dialog layout is different, send focus keys one at a time and confirm
+which field is selected before typing.
 
 ## 1. Determine what is alive
 
@@ -149,7 +178,8 @@ the `control.js` patch is missing.
 Expected after the cutover. Host PC IP is `127.0.0.1`. Use the dashboard. To
 restore computer SDB:
 
-1. Apps → `12345` → Host PC IP = computer IP.
+1. Open Apps and send `12345` with `scripts/vetro-key.py` (or `scripts/tv-remote.py`
+   before Vetro is installed), then set Host PC IP = computer IP.
 2. Reboot.
 3. The TV-local root agent will not start until it is set back to `127.0.0.1`.
 

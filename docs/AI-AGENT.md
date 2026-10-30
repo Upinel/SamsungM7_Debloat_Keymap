@@ -7,9 +7,10 @@ installed and rooted. Do not skip the verification gates.
 
 ```bash
 export TV_IP="192.168.1.50"   # example only - replace with your TV's IP
+export HOST_IP="192.168.1.23" # example only - this computer's LAN IP
 ```
 
-All commands below use `$TV_IP`. Earlier revisions used a test-LAN address;
+All commands below use `$TV_IP` and `$HOST_IP`. Earlier revisions used a test-LAN address;
 that address is not part of this guide.
 
 ## Target
@@ -18,6 +19,40 @@ that address is not part of this guide.
 - `T-NKLBWWC-1720.7`, BT-S
 - Vetro `0.3.5`, dashboard on `http://$TV_IP:8099`
 - Developer Mode Host PC IP `127.0.0.1`
+
+## Developer Mode without a keypad
+
+The M7 remote has no digit keys. Do not ask the user to type `12345` manually.
+
+If Vetro is already running, inject digits through the dashboard:
+
+```bash
+python3 scripts/vetro-key.py --tv "$TV_IP" digits 12345
+# focus the Developer mode toggle / Host PC IP field as needed
+python3 scripts/vetro-key.py --tv "$TV_IP" key Return
+python3 scripts/vetro-key.py --tv "$TV_IP" ip "$HOST_IP" --submit
+```
+
+Before Vetro is installed, use the Samsung WebSocket remote:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 scripts/tv-remote.py --tv "$TV_IP" --wait 60 --key KEY_HOME
+python3 scripts/tv-remote.py --tv "$TV_IP" --digits 12345
+python3 scripts/tv-remote.py --tv "$TV_IP" --ip "$HOST_IP"
+python3 scripts/tv-remote.py --tv "$TV_IP" --key KEY_DOWN --key KEY_ENTER
+```
+
+`HOST_IP` is the computer's LAN address, not the TV. After the initial install,
+change it to `127.0.0.1` for the TV-local root agent. Verify with:
+
+```bash
+curl -s "http://$TV_IP:8001/api/v2/" | python3 -c \
+  'import json,sys; d=json.load(sys.stdin)["device"]; print(d.get("developerMode"), d.get("developerIP"))'
+```
+
+If the UI focus is unclear, stop and ask the user which field is selected before
+sending navigation keys.
 
 ## Preconditions
 

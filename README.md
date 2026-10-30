@@ -84,8 +84,8 @@ Read this once.
 - The patches in `patches/` are applied to Vetro's installed files. A Vetro
   update will overwrite them; rerun the scripts after updating Vetro.
 
-Have the TV remote handy. You will need `12345` on the Apps screen to open
-Developer Mode.
+Have the physical remote handy to accept the WebSocket pairing prompt and
+confirm dialogs. The M7 remote has no number pad; use the network helpers below.
 
 ---
 
@@ -103,10 +103,100 @@ Set it once in the shell used for the commands below:
 
 ```bash
 export TV_IP="192.168.1.50"   # example only - replace with your TV's IP
+export HOST_IP="192.168.1.23" # example only - this computer's LAN IP
 ping -c 1 "$TV_IP"
 ```
 
 If a later shell cannot resolve `$TV_IP`, export it again.
+
+---
+
+## Enable Developer Mode without a number pad
+
+The M7 smart remote has no numeric keypad, so `12345` and the Host PC IP have to
+be entered over the network. There are two paths.
+
+### A. Vetro is already installed
+
+Vetro's dashboard can inject keys through its root agent. No pairing token is
+needed.
+
+```bash
+# Open Apps on the TV first, then:
+python3 scripts/vetro-key.py --tv "$TV_IP" digits 12345
+```
+
+The Developer Mode dialog opens. Select **Developer mode** and the **Host PC IP**
+field first; the helper only types into the focused field. If Developer mode is
+off, move to its toggle and press Return:
+
+```bash
+python3 scripts/vetro-key.py --tv "$TV_IP" key Return
+```
+
+Now set the **computer's** LAN IP (not the TV's IP) for the first install.
+Keep this address until Vetro is installed; only then switch to `127.0.0.1`.
+
+```bash
+# macOS Wi-Fi; use your computer's LAN address on other systems
+HOST_IP=$(ipconfig getifaddr en0)
+python3 scripts/vetro-key.py --tv "$TV_IP" ip "$HOST_IP" --submit
+```
+
+For the later TV-local root cutover, type `127.0.0.1` instead:
+
+```bash
+python3 scripts/vetro-key.py --tv "$TV_IP" ip 127.0.0.1 --submit
+```
+
+`--submit` presses Down then Return. If the dialog layout differs, or the value
+was not saved, send the focus/OK keys explicitly, for example:
+
+```bash
+python3 scripts/vetro-key.py --tv "$TV_IP" key Down Return
+```
+
+### B. Before Vetro is installed
+
+Use Samsung's local WebSocket remote. It needs a one-time pairing approval on
+the TV.
+
+```bash
+python3 -m pip install -r requirements.txt
+
+# The TV shows "Allow"; accept it with the physical remote.
+python3 scripts/tv-remote.py --tv "$TV_IP" --wait 60 --key KEY_HOME
+```
+
+Then open **Apps** on the TV (with the physical remote or the key commands),
+and send the digits:
+
+```bash
+python3 scripts/tv-remote.py --tv "$TV_IP" --digits 12345
+```
+
+Set the computer IP, then confirm:
+
+```bash
+HOST_IP=$(ipconfig getifaddr en0)     # macOS example
+python3 scripts/tv-remote.py --tv "$TV_IP" --ip "$HOST_IP"
+python3 scripts/tv-remote.py --tv "$TV_IP" --key KEY_DOWN --key KEY_ENTER
+```
+
+The first command saves the pairing token in `.tv-token` (gitignored). If the
+TV never shows an Allow prompt, enable **IP Remote** in the TV network settings
+and try again.
+
+### Verify Developer Mode
+
+```bash
+curl -s "http://$TV_IP:8001/api/v2/" | python3 -c \
+  'import json,sys; d=json.load(sys.stdin)["device"]; print(d.get("developerMode"), d.get("developerIP"))'
+```
+
+`developerMode` must be `1` and `developerIP` must match the address you typed.
+The REST API can lag until the dialog closes; power-cycling the TV makes it
+authoritative.
 
 ---
 
@@ -164,9 +254,20 @@ until the Host PC IP is changed in the next step.
 On the TV:
 
 1. Open **Apps**.
-2. Enter `12345` on the remote.
-3. Set **Host PC IP** to `127.0.0.1`.
-4. Confirm and **power-cycle the TV** (unplug it or use Restart).
+2. Send `12345` over the network:
+
+   ```bash
+   python3 scripts/vetro-key.py --tv "$TV_IP" digits 12345
+   ```
+
+3. Select the **Host PC IP** field.
+4. Type `127.0.0.1` and confirm:
+
+   ```bash
+   python3 scripts/vetro-key.py --tv "$TV_IP" ip 127.0.0.1 --submit
+   ```
+
+5. **Power-cycle the TV** (unplug it or use Restart).
 
 Wait up to 90 seconds. Then:
 
@@ -412,10 +513,13 @@ patches/
   README.md                    patch details and rebuild instructions
 scripts/
   m7vetro.py                   Vetro dashboard/root-agent client
+  tv-remote.py                 Samsung WebSocket pairing and key injection
+  vetro-key.py                 key injection through the Vetro dashboard
   apply-m7-patches.py          idempotent M7 patch installer
   setup-dock.py                writes inputs, starts the dock
   setup-remap.py               installs rules and starts the filter
   verify.py                    read-only health check
+requirements.txt               optional websocket-client dependency
 docs/
   AI-AGENT.md                  machine-oriented runbook
   TROUBLESHOOTING.md           longer fault tree
