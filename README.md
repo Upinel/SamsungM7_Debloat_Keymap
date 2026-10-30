@@ -1,4 +1,4 @@
-# Samsung M7 Debloat and Quick INPUT Switch
+# Samsung Smart Monitor (TV) M7 Debloat and Quick INPUT Switch
 
 > Quick remote INPUT switch (remap) HDMI 1, HDMI 2 and USB-C. System
 > optimisation and tweaks.
