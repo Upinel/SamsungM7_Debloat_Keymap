@@ -221,7 +221,7 @@ Set the computer IP, then confirm:
 ```bash
 HOST_IP=$(ipconfig getifaddr en0)     # macOS example
 python3 scripts/tv-remote.py --tv "$TV_IP" --ip "$HOST_IP"
-python3 scripts/tv-remote.py --tv "$TV_IP" --key KEY_DOWN --key KEY_ENTER
+python3 scripts/tv-remote.py --tv "$TV_IP" --key KEY_DOWN --key KEY_LEFT --key KEY_ENTER
 ```
 
 The first command saves the pairing token in `.tv-token` (gitignored). If the
