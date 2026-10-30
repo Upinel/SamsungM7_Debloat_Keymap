@@ -1,12 +1,22 @@
 # Troubleshooting
 
+## Set your TV IP
+
+```bash
+export TV_IP="192.168.1.50"   # example only - replace with your TV's IP
+```
+
+All commands below use `$TV_IP`. Earlier revisions used a test-LAN address;
+that address is not part of this guide.
+
+
 ## 1. Determine what is alive
 
 ```bash
-curl -sS http://10.0.1.18:8099/status
-curl -sS http://10.0.1.18:8099/dock
-curl -sS http://10.0.1.18:8099/input
-curl -sS http://10.0.1.18:8099/remap
+curl -sS http://$TV_IP:8099/status
+curl -sS http://$TV_IP:8099/dock
+curl -sS http://$TV_IP:8099/input
+curl -sS http://$TV_IP:8099/remap
 ```
 
 The three layers are independent:
@@ -34,7 +44,7 @@ service is `on-boot`; the root agent can take a minute on a cold boot.
 
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
-  -d '{"action":"refresh"}' http://10.0.1.18:8099/dock
+  -d '{"action":"refresh"}' http://$TV_IP:8099/dock
 ```
 
 Wait 30 seconds. The patched service also retries at 30s and 90s after boot.
@@ -52,7 +62,7 @@ Check `/dock` for `log`, `error`, `failures`.
 The patched dock binary was replaced or never installed.
 
 ```bash
-python3 scripts/apply-m7-patches.py --tv 10.0.1.18
+python3 scripts/apply-m7-patches.py --tv "$TV_IP"
 ```
 
 Confirm the installed DLL is the patched one:
@@ -60,7 +70,7 @@ Confirm the installed DLL is the patched one:
 ```bash
 curl -sS -X POST -H 'Content-Type: application/json' \
   -d '{"cmd":"sha256sum /opt/usr/apps/vetrotvapp/res/wgt/native/dock/tvlauncher-dotnet.dll"}' \
-  http://10.0.1.18:8099/exec
+  http://$TV_IP:8099/exec
 ```
 
 Expected SHA-256:
@@ -74,7 +84,7 @@ bdb12475da8c77700f1c563f85cd7bca50f08cca51a81ddcfa6091780602ed7b
 The dock catalog row is still `sys:com.samsung.tv.csfs`.
 
 ```bash
-python3 scripts/apply-m7-patches.py --tv 10.0.1.18
+python3 scripts/apply-m7-patches.py --tv "$TV_IP"
 ```
 
 The patched row must be:
@@ -90,7 +100,7 @@ Then refresh the dock.
 Check:
 
 ```bash
-curl -sS http://10.0.1.18:8099/input | python3 -m json.tool
+curl -sS http://$TV_IP:8099/input | python3 -m json.tool
 ```
 
 Healthy:
@@ -107,14 +117,14 @@ Healthy:
 If not, rerun:
 
 ```bash
-python3 scripts/setup-remap.py --tv 10.0.1.18
+python3 scripts/setup-remap.py --tv "$TV_IP"
 ```
 
 If the remote is on another node, list selectable devices with `GET /input` and
 run:
 
 ```bash
-python3 scripts/setup-remap.py --tv 10.0.1.18 --node /dev/input/eventN
+python3 scripts/setup-remap.py --tv "$TV_IP" --node /dev/input/eventN
 ```
 
 After a Vetro update, the `KEY_HDMI*` aliases may be gone. Re-run
@@ -127,7 +137,7 @@ Test the action manually:
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
   -d '{"type":"physical","value":"226"}' \
-  http://10.0.1.18:8099/remap/run
+  http://$TV_IP:8099/remap/run
 ```
 
 A successful response is `{"ok":true,"sent":1,...}`. If it is, the key action
@@ -148,10 +158,10 @@ restore computer SDB:
 Vetro updates replace `service/*.js` and the dock DLL. Re-apply:
 
 ```bash
-python3 scripts/apply-m7-patches.py --tv 10.0.1.18
-python3 scripts/setup-dock.py        --tv 10.0.1.18
-python3 scripts/setup-remap.py       --tv 10.0.1.18
-python3 scripts/verify.py            --tv 10.0.1.18
+python3 scripts/apply-m7-patches.py --tv "$TV_IP"
+python3 scripts/setup-dock.py        --tv "$TV_IP"
+python3 scripts/setup-remap.py       --tv "$TV_IP"
+python3 scripts/verify.py            --tv "$TV_IP"
 ```
 
 Saved `.m7bak` files are from the *original* Vetro version. Do not restore them
@@ -161,11 +171,11 @@ over a newer Vetro build; rerun the patches instead.
 
 ```bash
 # disable remap
-curl -X POST -H 'Content-Type: application/json' -d '{"mode":"off"}' http://10.0.1.18:8099/input
+curl -X POST -H 'Content-Type: application/json' -d '{"mode":"off"}' http://$TV_IP:8099/input
 # disable dock
-curl -X POST -H 'Content-Type: application/json' -d '{"action":"disable"}' http://10.0.1.18:8099/dock
+curl -X POST -H 'Content-Type: application/json' -d '{"action":"disable"}' http://$TV_IP:8099/dock
 # uninstall
-./apps2samsung-cli uninstall vetrotvapp.app --tv 10.0.1.18
+./apps2samsung-cli uninstall vetrotvapp.app --tv "$TV_IP"
 ```
 
 Set Host PC IP back first if Apps2Samsung cannot reach SDB.

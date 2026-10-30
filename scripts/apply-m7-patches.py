@@ -92,7 +92,7 @@ def patch_watchdog(tv: TV) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tv", required=True, help="TV IP, for example 10.0.1.18")
+    parser.add_argument("--tv", required=True, help="TV IP address")
     parser.add_argument(
         "--dock-dll",
         default=str(Path(__file__).resolve().parent.parent / "patches" / "tvlauncher-dotnet-m7.dll"),

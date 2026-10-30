@@ -3,6 +3,15 @@
 A deterministic sequence for an agent setting up a TV that already has Vetro
 installed and rooted. Do not skip the verification gates.
 
+## Set your TV IP
+
+```bash
+export TV_IP="192.168.1.50"   # example only - replace with your TV's IP
+```
+
+All commands below use `$TV_IP`. Earlier revisions used a test-LAN address;
+that address is not part of this guide.
+
 ## Target
 
 - `LS32BM701UUXXU`, `22_NIKEL_SMT`, Tizen 6.5
@@ -13,7 +22,7 @@ installed and rooted. Do not skip the verification gates.
 ## Preconditions
 
 ```bash
-curl -fsS http://10.0.1.18:8099/status | python3 -m json.tool
+curl -fsS http://$TV_IP:8099/status | python3 -m json.tool
 ```
 
 Proceed only when all are true:
@@ -29,10 +38,10 @@ wait 10 seconds. Do not try SDB; Host PC IP is intentionally local-only.
 ## Sequence
 
 ```bash
-python3 scripts/apply-m7-patches.py --tv 10.0.1.18
-python3 scripts/setup-dock.py        --tv 10.0.1.18
-python3 scripts/setup-remap.py       --tv 10.0.1.18
-python3 scripts/verify.py            --tv 10.0.1.18
+python3 scripts/apply-m7-patches.py --tv "$TV_IP"
+python3 scripts/setup-dock.py        --tv "$TV_IP"
+python3 scripts/setup-remap.py       --tv "$TV_IP"
+python3 scripts/verify.py            --tv "$TV_IP"
 ```
 
 `apply-m7-patches.py` is idempotent. It restarts the Vetro service and starts the
@@ -44,14 +53,14 @@ to 120 seconds.
 After the patch step:
 
 ```bash
-curl -fsS http://10.0.1.18:8099/dock | python3 -c \
+curl -fsS http://$TV_IP:8099/dock | python3 -c \
   'import json,sys; d=json.load(sys.stdin); assert d["enabled"] and d["running"], d; print("dock ok")'
 ```
 
 After the remap step:
 
 ```bash
-curl -fsS http://10.0.1.18:8099/input | python3 -c \
+curl -fsS http://$TV_IP:8099/input | python3 -c \
   'import json,sys; d=json.load(sys.stdin)["status"]["policy"]; assert d["connected"]; assert set(["226","626","221"]) == set(d["blocked"]); print(d)'
 ```
 

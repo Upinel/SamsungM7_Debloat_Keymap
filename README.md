@@ -89,6 +89,27 @@ Developer Mode.
 
 ---
 
+## Find the TV's IP
+
+The example IP that used to be in this guide belonged to one test network. Do
+not use it. Find the address of **your** TV:
+
+- On the TV: **Settings → General → Network → Network Status → IP Address**.
+- Or look for the TV's MAC/hostname in your router's DHCP client list.
+
+Give the TV a DHCP reservation if possible, so the address stays the same.
+
+Set it once in the shell used for the commands below:
+
+```bash
+export TV_IP="192.168.1.50"   # example only - replace with your TV's IP
+ping -c 1 "$TV_IP"
+```
+
+If a later shell cannot resolve `$TV_IP`, export it again.
+
+---
+
 ## Step 1 — Install Apps2Samsung
 
 Download the CLI for your computer from
@@ -107,7 +128,7 @@ The desktop app works too. The CLI is used below because it can be scripted.
 Check the TV:
 
 ```bash
-./apps2samsung-cli tv 10.0.1.18
+./apps2samsung-cli tv "$TV_IP"
 ```
 
 Developer Mode must be on and the TV must expose SDB. If it reports a
@@ -118,7 +139,7 @@ certificate is needed, the first install will open Samsung sign-in.
 ## Step 2 — Install Vetro with root integration
 
 ```bash
-./apps2samsung-cli install "Vetro" --tv 10.0.1.18 --allow-root --yes --launch
+./apps2samsung-cli install "Vetro" --tv "$TV_IP" --allow-root --yes --launch
 ```
 
 What happens:
@@ -127,12 +148,12 @@ What happens:
 - Because Vetro requires restricted privileges, it signs with a **Partner**
   certificate. The first run opens Samsung sign-in.
 - The app is installed as `vetrotvapp.app` and launched.
-- Vetro serves its dashboard at `http://10.0.1.18:8099`.
+- Vetro serves its dashboard at `http://$TV_IP:8099`.
 
 Verify:
 
 ```bash
-curl http://10.0.1.18:8099/status
+curl http://$TV_IP:8099/status
 ```
 
 The first launch may report the root agent as disconnected. That is expected
@@ -150,7 +171,7 @@ On the TV:
 Wait up to 90 seconds. Then:
 
 ```bash
-curl http://10.0.1.18:8099/status
+curl http://$TV_IP:8099/status
 ```
 
 The response should include:
@@ -169,7 +190,7 @@ From this point the TV roots itself at boot. Your computer no longer needs SDB.
 ## Step 3 — Apply the M7 patches
 
 ```bash
-python3 scripts/apply-m7-patches.py --tv 10.0.1.18
+python3 scripts/apply-m7-patches.py --tv "$TV_IP"
 ```
 
 This is idempotent. It writes backups as `*.m7bak` on the TV and:
@@ -187,7 +208,7 @@ once, wait 10 seconds, and run it again.
 Verify the dock:
 
 ```bash
-curl http://10.0.1.18:8099/dock
+curl http://$TV_IP:8099/dock
 ```
 
 `enabled` and `running` should both be `true`.
@@ -197,7 +218,7 @@ curl http://10.0.1.18:8099/dock
 ## Step 4 — Add the USB-C input tile
 
 ```bash
-python3 scripts/setup-dock.py --tv 10.0.1.18
+python3 scripts/setup-dock.py --tv "$TV_IP"
 ```
 
 This writes:
@@ -217,7 +238,7 @@ Samsung Home first. The dock's app row is built from Samsung Home's row.
 ## Step 5 — Install the remap rules
 
 ```bash
-python3 scripts/setup-remap.py --tv 10.0.1.18
+python3 scripts/setup-remap.py --tv "$TV_IP"
 ```
 
 This posts the rules and starts the physical input filter:
@@ -236,7 +257,7 @@ Use `--node /dev/input/eventN` if your remote appears elsewhere.
 ## Step 6 — Verify and reboot
 
 ```bash
-python3 scripts/verify.py --tv 10.0.1.18
+python3 scripts/verify.py --tv "$TV_IP"
 ```
 
 Expected:
@@ -263,7 +284,7 @@ remapper rules and filter should all return without opening the Vetro app.
 - **Netflix / Disney+ / Prime Video** switch directly to HDMI 1 / HDMI 2 / USB-C.
 - Other remote buttons pass through untouched.
 
-The Vetro dashboard at `http://10.0.1.18:8099` is the control panel for
+The Vetro dashboard at `http://$TV_IP:8099` is the control panel for
 launcher, remapper, app inventory, debloat, DNS and diagnostics.
 
 ---
@@ -290,13 +311,13 @@ Debloating is optional. The input remap and launcher do not depend on it.
 
 ### The dock is missing after boot
 
-1. Check `curl http://10.0.1.18:8099/status` — is the agent connected?
+1. Check `curl http://$TV_IP:8099/status` — is the agent connected?
 2. Check `/dock` — is it `enabled` but not `running`?
 3. Refresh it:
 
    ```bash
    curl -X POST -H 'Content-Type: application/json' \
-     -d '{"action":"refresh"}' http://10.0.1.18:8099/dock
+     -d '{"action":"refresh"}' http://$TV_IP:8099/dock
    ```
 
 4. If the service is down, open the Vetro app on the TV once. The watchdog then
@@ -346,20 +367,20 @@ Turn off the remapper filter:
 
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
-  -d '{"mode":"off"}' http://10.0.1.18:8099/input
+  -d '{"mode":"off"}' http://$TV_IP:8099/input
 ```
 
 Turn off the dock:
 
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
-  -d '{"action":"disable"}' http://10.0.1.18:8099/dock
+  -d '{"action":"disable"}' http://$TV_IP:8099/dock
 ```
 
 Uninstall Vetro:
 
 ```bash
-./apps2samsung-cli uninstall vetrotvapp.app --tv 10.0.1.18
+./apps2samsung-cli uninstall vetrotvapp.app --tv "$TV_IP"
 ```
 
 If SDB is locked, set Host PC IP back to the computer's IP first and reboot.
