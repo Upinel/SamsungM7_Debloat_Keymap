@@ -65,6 +65,47 @@ filter reconnects automatically.
 
 ---
 
+## Let an AI agent do it
+
+You can hand the job to a capable coding agent. Send it:
+
+- this repository: <https://github.com/Upinel/SamsungM7_Debloat_Keymap>
+- the TV's IP address (`TV_IP`)
+- the computer's LAN IP (`HOST_IP`)
+- the TV model and software: `LS32BM701UUXXU`, `T-NKLBWWC-1720.7`, BT-S
+- confirmation that it may root the TV, and that you have physical access to
+  accept pairing prompts and confirm dialogs
+
+A suitable prompt:
+
+> Read the README and `docs/AI-AGENT.md` in
+> https://github.com/Upinel/SamsungM7_Debloat_Keymap and set up Vetro plus the
+> HDMI 1 / HDMI 2 / USB-C button remap on my Samsung M7. TV IP is `<TV_IP>`,
+> computer IP is `<HOST_IP>`. The model is `LS32BM701UUXXU`, software is
+> `T-NKLBWWC-1720.7`, BT-S. I accept the root risk and can press buttons on the
+> TV when asked. Verify with `scripts/verify.py` and test after a cold boot.
+
+The agent should use the scripts rather than inventing new commands, and should
+stop and ask you when the TV screen or UI focus is unclear.
+
+### A note about Claude and other hosted assistants
+
+Some assistants, **including Claude**, may decline requests that describe
+rooting, exploitation, or low-level device modification, even when the device
+is yours and the goal is a personal launcher or input remap. This is a safety
+policy refusal, not a technical limitation of this guide.
+
+If that happens:
+
+- use a different coding agent or a local agent without that restriction;
+- run the steps yourself using this README; or
+- ask the agent to assist only with the non-root parts (docs, scripts, review)
+  and perform the root steps manually.
+
+Do not try to disguise the request to get around an assistant's safety policy.
+
+---
+
 ## Before you start
 
 Read this once.

@@ -3,6 +3,17 @@
 A deterministic sequence for an agent setting up a TV that already has Vetro
 installed and rooted. Do not skip the verification gates.
 
+## Hand-off from the user
+
+The user may give you only the repository URL, `TV_IP`, `HOST_IP`, and the TV
+model/software. Confirm they accept the root risk and have physical access for
+pairing and dialog confirmation.
+
+Some hosted assistants, including Claude, may refuse rooting or low-level device
+modification even on the user's own TV. If you are such an assistant, say so;
+do not work around the policy. Point the user to the human-runnable README
+instead.
+
 ## Set your TV IP
 
 ```bash
